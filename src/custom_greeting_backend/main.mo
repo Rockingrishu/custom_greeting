@@ -10,7 +10,8 @@ actor DBank {
   type Passbook = {
     transactionType: Text;
     amount: Float;
-    // date: Time.;
+    date: Time.Time;
+    currentAmount: Float; 
   };
 
   var transactions: [Passbook] = [];
@@ -21,7 +22,8 @@ actor DBank {
     let passbook: Passbook = {
       transactionType = "Deposit";
       amount = amount;
-      // date = date;
+      date = Time.now()/1000000;
+      currentAmount = currentValue; 
     };
     transactions := Array.append<Passbook>(transactions, [passbook]);
     Debug.print(debug_show(currentValue));
@@ -34,7 +36,8 @@ actor DBank {
       let passbook: Passbook = {
         transactionType = "Withdrawal";
         amount = amount;
-        // date: date;
+        date = Time.now()/1000000;
+        currentAmount = currentValue; // Store the current total
       };
       transactions := Array.append<Passbook>(transactions, [passbook]);
       Debug.print(debug_show(currentValue));

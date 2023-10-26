@@ -1,6 +1,9 @@
+type Time = int;
 type Passbook = 
  record {
    amount: float64;
+   currentAmount: float64;
+   date: Time;
    transactionType: text;
  };
 service : {

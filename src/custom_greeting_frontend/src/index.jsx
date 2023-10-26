@@ -1,65 +1,84 @@
 import { custom_greeting_backend } from "../../declarations/custom_greeting_backend";
 
 window.addEventListener("load", async () => {
-  
-  const amount= await custom_greeting_backend.getBalance();
+  const amount = await custom_greeting_backend.getBalance();
   document.getElementById("totalamount").innerText = amount;
 });
 
+document.getElementById("depositButton").addEventListener("click", async () => {
+  const depositAmount = parseInt(document.getElementById("depositAmount").value) || 0;
 
-document.querySelector("form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const button = e.target.querySelector("button");
-
-  const inputAmount = parseInt(document.getElementById("depositAmount").value) || 0;
-  const withdrawAmount = parseInt(document.getElementById("withdrawAmount").value) || 0;
-
-  // Check if input values are valid numbers
-  if (isNaN(inputAmount) || isNaN(withdrawAmount)) {
-    alert("Please enter valid numbers for deposit and withdrawal amounts.");
+  if (isNaN(depositAmount)) {
+    alert("Please enter a valid number for the deposit amount.");
     return;
   }
 
-  button.setAttribute("disabled", true);
+  await custom_greeting_backend.topUp(depositAmount);
 
-  // Interact with foo actor, calling the greet method
-  await custom_greeting_backend.topUp(inputAmount);
-  await custom_greeting_backend.withdraw(withdrawAmount);
-  button.removeAttribute("disabled");
-
-  const amount= await custom_greeting_backend.getBalance();
-
+  const amount = await custom_greeting_backend.getBalance();
   document.getElementById("totalamount").innerText = amount;
 
   document.getElementById("depositAmount").value = "";
-  document.getElementById("withdrawAmount").value = "";
+});
 
-  return false;
+document.getElementById("withdrawButton").addEventListener("click", async () => {
+  const withdrawAmount = parseInt(document.getElementById("withdrawAmount").value) || 0;
+
+  if (isNaN(withdrawAmount)) {
+    alert("Please enter a valid number for the withdrawal amount.");
+    return;
+  }
+
+  await custom_greeting_backend.withdraw(withdrawAmount);
+
+  const amount = await custom_greeting_backend.getBalance();
+  document.getElementById("totalamount").innerText = amount;
+
+  document.getElementById("withdrawAmount").value = "";
 });
 
 document.getElementById("passbookButton").addEventListener("click", async () => {
   const transactionList = await custom_greeting_backend.getTransactionList();
-  const transactionListSection = document.getElementById("transactionList");
-
-  // Clear the transaction list section
-  transactionListSection.innerHTML = "";
+  
+  const transactionTable = document.getElementById("transactionTable");
+  transactionTable.innerHTML = "";
 
   if (transactionList.length === 0) {
-    transactionListSection.innerText = "No transactions available.";
+    transactionTable.innerHTML = "<tr><td colspan='4'>No transactions available.</td></tr>";
   } else {
-    // Create a list to display transactions
-     const transactionListUl = document.createElement("ul");
-
     transactionList.forEach((transaction) => {
-      const transactionItem = document.createElement("li");
-      const transactionDate = new Date(transaction.timestamp);
-      const transactionType = transaction.amount > 0 ? "Deposit" : "Withdrawal";
+      const transactionRow = document.createElement("tr");
 
-      transactionItem.innerText = `${transactionType} - ₹${transaction.amount} on ${transactionDate.toLocaleDateString()}`;
-      transactionListUl.appendChild(transactionItem);
+      const transactionTypeCell = document.createElement("td");
+      transactionTypeCell.innerText = transaction.transactionType;
+
+      const amountCell = document.createElement("td");
+      amountCell.innerText = `₹${transaction.amount}`;
+
+      const dateCell = document.createElement("td");
+      const transactionDate = new Date(Number(transaction.date)); // Convert from BigInt to Date
+      if (!isNaN(transactionDate)) {
+        dateCell.innerText = transactionDate.toLocaleString();
+      } else {
+        dateCell.innerText = "Invalid Date";
+      }
+
+      const currentAccountCell = document.createElement("td");
+      currentAccountCell.innerText = `₹${transaction.currentAmount}`;
+
+      transactionRow.appendChild(transactionTypeCell);
+      transactionRow.appendChild(amountCell);
+      transactionRow.appendChild(dateCell);
+      transactionRow.appendChild(currentAccountCell);
+
+      transactionTable.appendChild(transactionRow);
     });
-
-
-    transactionListSection.appendChild(transactionListUl);
   }
+});
+
+
+
+document.getElementById("clearButton").addEventListener("click", () => {
+  const transactionTable = document.getElementById("transactionTable");
+  transactionTable.innerHTML = "";
 });

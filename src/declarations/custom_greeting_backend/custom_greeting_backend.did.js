@@ -1,6 +1,9 @@
 export const idlFactory = ({ IDL }) => {
+  const Time = IDL.Int;
   const Passbook = IDL.Record({
     'transactionType' : IDL.Text,
+    'date' : Time,
+    'currentAmount' : IDL.Float64,
     'amount' : IDL.Float64,
   });
   return IDL.Service({
