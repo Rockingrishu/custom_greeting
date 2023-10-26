@@ -1,0 +1,11 @@
+type Passbook = 
+ record {
+   amount: float64;
+   transactionType: text;
+ };
+service : {
+  getBalance: () -> (float64) query;
+  getTransactionList: () -> (vec Passbook) query;
+  topUp: (float64) -> () oneway;
+  withdraw: (float64) -> () oneway;
+}
